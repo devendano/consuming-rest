@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -27,10 +28,14 @@ public class ConsumingRestApplication {
     @Bean
     public CommandLineRunner run(RestTemplate restTemplate) {
         return args -> {
-            Quote quote = restTemplate.getForObject(
-                    "http://localhost:8080/api/random", Quote.class);
-            if (quote != null)
-                log.info(quote.toString());
+            Quote quote;
+            try {
+                quote = restTemplate.getForObject("http://localhost:8080/api/random", Quote.class);
+                if (quote != null)
+                    log.info(quote.toString());
+            } catch (RestClientException e) {
+                log.error("Initial Connection Error: ", e);
+            }
         };
     }
 
